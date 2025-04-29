@@ -1,0 +1,16 @@
+[Unit]
+Description=Wiki.js
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/wiki/start.sh
+ExecStop=/opt/wiki/stop.sh
+Restart=No
+User=wiki
+WorkingDirectory=/opt/wiki
+
+[Install]
+WantedBy=multi-user.target

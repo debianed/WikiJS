@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: postgres-wikijs-dev
+    environment:
+      POSTGRES_DB: pgwiki
+      POSTGRES_PASSWORD: pgwiki-pass
+      POSTGRES_USER: pgwiki-user
+    user: "${WUID}:${WGID}"
+    logging:
+      driver: "none"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ifcmwiki -d ifcmtechwiki"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - net
+    volumes:
+      - /opt/wiki/pgdata:/var/lib/postgresql/data
+  wiki:
+    image: ghcr.io/requarks/wiki:2
+    container_name: wikijs-dev
+    depends_on:
+      - db
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: pgwiki-user
+      DB_PASS: pgwiki-pass
+      DB_NAME: pgwiki
+    user: "${WUID}:${WGID}"
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://127.0.0.1:3000/ || exit 1
+      interval: 60s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    ports:
+      - "80:3000"
+      - "444:3443"
+    networks:
+      - net
+    volumes:
+      - /opt/wiki/wiki-config.yaml:/wiki/config.yml
+      - /opt/wiki/backup:/wiki/backup
+      - /opt/wiki/wikidata:/wiki/data
+      - /opt/wiki/fix-data:/etc/cont-init.d/51-data
+      - /opt/wiki/ru.yaml:/wiki/server/locales/ru.yml
+
+networks:
+  net:

@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: postgres-wikijs-dev
+    container_name: postgres-wikijs
     environment:
       POSTGRES_DB: pgwiki
       POSTGRES_PASSWORD: pgwiki-pass
@@ -22,7 +22,7 @@ services:
       - /opt/wiki/pgdata:/var/lib/postgresql/data
   wiki:
     image: ghcr.io/requarks/wiki:2
-    container_name: wikijs-dev
+    container_name: wikijs
     depends_on:
       - db
     environment:
@@ -42,7 +42,7 @@ services:
       timeout: 10s
     ports:
       - "80:3000"
-      - "444:3443"
+      - "443:3443"
     networks:
       - net
     volumes:
